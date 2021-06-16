@@ -18,10 +18,8 @@ import java.util.concurrent.TimeoutException;
 @EnableScheduling
 public class ProducerApplication implements CommandLineRunner {
 
-    //TODO application.properties
-    static final String exchangeName = "message-broker-exchange-name";
-    static final String queueName = "message-broker-queue-name";
-    static final String routingKey = "message-broker-routing-key";
+    @Autowired
+    private RabbitMQConfiguration rabbitMQConfiguration;
 
     @Autowired
     private ConfigurableApplicationContext context;
@@ -67,9 +65,9 @@ public class ProducerApplication implements CommandLineRunner {
         try (var connection = factory.newConnection();
              var channel = connection.createChannel()) {
             //channel.exchangeDeclare(exchangeName, "direct", true);
-            channel.queueDeclare(queueName, false, false, false, null);
+            channel.queueDeclare(rabbitMQConfiguration.getQueueName(), false, false, false, null);
             var basicProperties = new AMQP.BasicProperties().builder().timestamp(new Date()).build();
-            channel.basicPublish("", queueName, basicProperties, message.getBytes());
+            channel.basicPublish("", rabbitMQConfiguration.getQueueName(), basicProperties, message.getBytes());
         }
     }
 }
